@@ -1,0 +1,12 @@
+{
+  "name": "contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test -vvv",
+    "deploy:sepolia": "forge script script/Deploy.s.sol:Deploy --rpc-url $ARBITRUM_SEPOLIA_RPC --broadcast --verify -vvvv",
+    "setup:demo": "forge script script/Setup.s.sol:Setup --rpc-url $ARBITRUM_SEPOLIA_RPC --broadcast -vvvv"
+  },
+  "devDependencies": {}
+}
