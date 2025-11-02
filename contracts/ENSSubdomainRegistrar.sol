@@ -60,7 +60,7 @@ contract ENSSubdomainRegistrar is Ownable {
     
     /**
      * @dev Register a new subdomain for a user
-     * @param subdomain The subdomain string (e.g., "juan123")
+     * @param subdomain The subdomain string
      * @param owner The address that will own this subdomain
      */
     function registerSubdomain(string memory subdomain, address owner) external onlyOwner {
