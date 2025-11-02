@@ -3,24 +3,25 @@ pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// ENS Registry interface
+interface IENSRegistry {
+    function setSubnodeOwner(bytes32 node, bytes32 label, address owner) external;
+    function setResolver(bytes32 node, address resolver) external;
+    function owner(bytes32 node) external view returns (address);
+}
+
+// ENS Resolver interface for setting records
+interface IENSResolver {
+    function setAddr(bytes32 node, address addr) external;
+    function setText(bytes32 node, string calldata key, string calldata value) external;
+}
+
 /**
  * @title ENSSubdomainRegistrar
  * @dev Simplified ENS subdomain registrar for LATAM DeFi platform
  * Issues subdomains like user123.latam.eth for verified users
  */
 contract ENSSubdomainRegistrar is Ownable {
-    // ENS Registry interface
-    interface IENSRegistry {
-        function setSubnodeOwner(bytes32 node, bytes32 label, address owner) external;
-        function setResolver(bytes32 node, address resolver) external;
-        function owner(bytes32 node) external view returns (address);
-    }
-    
-    // ENS Resolver interface for setting records
-    interface IENSResolver {
-        function setAddr(bytes32 node, address addr) external;
-        function setText(bytes32 node, string calldata key, string calldata value) external;
-    }
     
     IENSRegistry public immutable ensRegistry;
     IENSResolver public immutable ensResolver;
@@ -51,7 +52,7 @@ contract ENSSubdomainRegistrar is Ownable {
         address _ensRegistry,
         address _ensResolver,
         bytes32 _rootNode
-    ) {
+    ) Ownable(msg.sender) {
         ensRegistry = IENSRegistry(_ensRegistry);
         ensResolver = IENSResolver(_ensResolver);
         rootNode = _rootNode;
