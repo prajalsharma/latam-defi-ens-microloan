@@ -9,10 +9,8 @@ import Dashboard from '../components/Dashboard';
 import LoanManager from '../components/LoanManager';
 import ENSIdentity from '../components/ENSIdentity';
 import DepositVault from '../components/DepositVault';
-import Analytics from '../components/Analytics';
-import Settings from '../components/Settings';
 import WelcomeModal from '../components/modals/WelcomeModal';
-import { Toaster } from '../components/ui/Toaster';
+import Toaster from '../components/ui/Toaster';
 
 export default function Home() {
   const { address, isConnected, chainId } = useAccount();

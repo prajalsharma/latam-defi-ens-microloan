@@ -11,18 +11,15 @@ const queryClient = new QueryClient();
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'your-privy-app-id'}
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID as string}
       config={{
         supportedChains: [arbitrumSepolia],
-        loginMethods: ['wallet', 'email', 'google', 'twitter'],
-        appearance: {
-          theme: 'light',
-          accentColor: '#2563eb',
-          logo: '🇲🇽',
-          walletList: ['metamask', 'coinbase_wallet', 'wallet_connect', 'detected_wallets'],
+        loginMethods: ['wallet'],
+        externalWallets: {
+          disableAllExternalWallets: false,
         },
-        embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+        appearance: {
+          walletList: ['detected_wallets'],
         },
         defaultChain: arbitrumSepolia,
       }}
