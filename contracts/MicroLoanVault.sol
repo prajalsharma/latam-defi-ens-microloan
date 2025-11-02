@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
@@ -11,6 +12,8 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * Supports USDC/DAI deposits, loans tied to ENS identities, and basic credit scoring
  */
 contract MicroLoanVault is Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+    
     IERC20 public immutable stablecoin; // USDC or DAI
     
     struct LoanData {
@@ -91,7 +94,7 @@ contract MicroLoanVault is Ownable, ReentrancyGuard {
      */
     function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be greater than 0");
-        require(stablecoin.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        stablecoin.safeTransferFrom(msg.sender, address(this), amount);
         
         depositorBalances[msg.sender] += amount;
         totalDeposits += amount;
@@ -149,7 +152,7 @@ contract MicroLoanVault is Ownable, ReentrancyGuard {
         
         profile.totalBorrowed += amount;
         totalLoansOutstanding += amount;
-        require(stablecoin.transfer(msg.sender, amount), "Transfer failed");
+        stablecoin.safeTransfer(msg.sender, amount);
         
         emit LoanRequested(ensNode, amount, interestRate);
     }
@@ -164,7 +167,7 @@ contract MicroLoanVault is Ownable, ReentrancyGuard {
         uint256 interest = calculateInterest(ensNode);
         uint256 totalRepayment = loan.amount + interest;
         
-        require(stablecoin.transferFrom(msg.sender, address(this), totalRepayment), "Transfer failed");
+        stablecoin.safeTransferFrom(msg.sender, address(this), totalRepayment);
         
         loan.isActive = false;
         loan.isRepaid = true;
@@ -204,7 +207,7 @@ contract MicroLoanVault is Ownable, ReentrancyGuard {
         require(amount > 0, "Amount must be greater than 0");
         require(ensToWallet[ensNode] != address(0), "ENS not linked to wallet");
         
-        require(stablecoin.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        stablecoin.safeTransferFrom(msg.sender, address(this), amount);
         
         // Record payment
         paymentHistory[ensNode].push(Payment({
@@ -248,7 +251,7 @@ contract MicroLoanVault is Ownable, ReentrancyGuard {
         depositorYield[msg.sender] += pendingYield;
         totalYieldDistributed += pendingYield;
         
-        require(stablecoin.transfer(msg.sender, pendingYield), "Transfer failed");
+        stablecoin.safeTransfer(msg.sender, pendingYield);
         
         emit YieldDistributed(msg.sender, pendingYield);
     }
@@ -330,7 +333,7 @@ contract MicroLoanVault is Ownable, ReentrancyGuard {
         depositorBalances[msg.sender] -= amount;
         totalDeposits -= amount;
         
-        require(stablecoin.transfer(msg.sender, amount), "Transfer failed");
+        stablecoin.safeTransfer(msg.sender, amount);
     }
     
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
