@@ -1,19 +1,33 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { injected } from 'wagmi/connectors';
+import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 import LoanDashboard from '../components/LoanDashboard';
 import ENSManager from '../components/ENSManager';
 import DepositInterface from '../components/DepositInterface';
+import QRPayment from '../components/QRPayment';
+import CreditDashboard from '../components/CreditDashboard';
 
 export default function Home() {
-  const { address, isConnected } = useAccount();
-  const { connect } = useConnect();
-  const { disconnect } = useDisconnect();
+  const { ready, authenticated, login, logout } = usePrivy();
+  const { address } = useAccount();
   const [activeTab, setActiveTab] = useState('loans');
 
-  if (!isConnected) {
+  if (!ready) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
@@ -25,11 +39,14 @@ export default function Home() {
               ENS-powered microloans for the underbanked
             </p>
             <button
-              onClick={() => connect({ connector: injected() })}
+              onClick={login}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full"
             >
               Connect Wallet
             </button>
+            <p className="text-xs text-gray-500 mt-3">
+              Powered by Privy - Connect with wallet, email, or social
+            </p>
           </div>
         </div>
       </div>
@@ -52,10 +69,10 @@ export default function Home() {
                 {address?.slice(0, 6)}...{address?.slice(-4)}
               </div>
               <button
-                onClick={() => disconnect()}
+                onClick={logout}
                 className="text-red-600 hover:text-red-700 text-sm"
               >
-                Disconnect
+                Logout
               </button>
             </div>
           </div>
@@ -68,7 +85,9 @@ export default function Home() {
           <div className="flex space-x-8">
             {[
               { id: 'loans', label: 'Loans', icon: '💰' },
+              { id: 'credit', label: 'Credit Score', icon: '📊' },
               { id: 'ens', label: 'ENS Identity', icon: '🆔' },
+              { id: 'payment', label: 'QR Payment', icon: '📱' },
               { id: 'deposit', label: 'Earn Yield', icon: '📈' },
             ].map((tab) => (
               <button
@@ -90,7 +109,9 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'loans' && <LoanDashboard />}
+        {activeTab === 'credit' && <CreditDashboard />}
         {activeTab === 'ens' && <ENSManager />}
+        {activeTab === 'payment' && <QRPayment ensName="user.latamcredit.eth" />}
         {activeTab === 'deposit' && <DepositInterface />}
       </main>
     </div>
